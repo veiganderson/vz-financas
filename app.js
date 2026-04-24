@@ -288,11 +288,10 @@ const renderTransactions = () => {
 
         <div>${sign} ${formatCurrency(t.amount)}</div>
 
-        <div>
-          <button onclick="editTransaction(${t.id})">✏️</button>
-          <button onclick="deleteTransaction(${t.id})">🗑️</button>
-        </div>
-      </div>
+<div>
+  <button onclick="editTransaction('${t.id}')">✏️</button>
+  <button onclick="deleteTransaction('${t.id}')">🗑️</button>
+</div>
     `;
   }).join('');
 };
