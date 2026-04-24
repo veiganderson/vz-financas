@@ -34,14 +34,18 @@
   <ul id="list"></ul>
 </div>
 
+<!-- CONFIG (chaves separadas) -->
+<script src="config.js"></script>
+
+<!-- Supabase -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
 const { createClient } = supabase
 
 const client = createClient(
-  'https://wmfegtjgfvlnvyepgivd.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtZmVndGpnZnZsbnZ5ZXBnaXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMjg4OTYsImV4cCI6MjA5MjYwNDg5Nn0.ZwEbMCaDcblBrz1-TfINCzJonjmjVh--EXKCk24uQzs'
+  SUPABASE_URL,
+  SUPABASE_KEY
 )
 
 function showApp() {
