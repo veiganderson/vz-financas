@@ -17,16 +17,18 @@
 <input id="amount" placeholder="Valor"><br>
 <button onclick="addTransaction()">Salvar</button>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-const supabase = createClient(
+<script>
+const { createClient } = supabase
+
+const client = createClient(
   'https://wmfegtjgfvlnvyepgivd.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtZmVndGpnZnZsbnZ5ZXBnaXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMjg4OTYsImV4cCI6MjA5MjYwNDg5Nn0.ZwEbMCaDcblBrz1-TfINCzJonjmjVh--EXKCk24uQzs'
 )
 
-window.login = async () => {
-  const { error } = await supabase.auth.signInWithPassword({
+async function login() {
+  const { error } = await client.auth.signInWithPassword({
     email: document.getElementById('email').value,
     password: document.getElementById('password').value
   })
@@ -34,15 +36,15 @@ window.login = async () => {
   alert(error ? error.message : "Logado com sucesso")
 }
 
-window.addTransaction = async () => {
-  const { data: { user } } = await supabase.auth.getUser()
+async function addTransaction() {
+  const { data: { user } } = await client.auth.getUser()
 
   if (!user) {
     alert("Faça login primeiro")
     return
   }
 
-  const { error } = await supabase
+  const { error } = await client
     .from('transactions')
     .insert({
       user_id: user.id,
