@@ -5,6 +5,7 @@ const client = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Estado global
 let allTransactions = [];
 let currentFilter = 'all';
+let editingTransactionId = null; // Novo: ID da transação sendo editada
 
 // Utility Functions
 const formatCurrency = (value) => {
@@ -100,6 +101,8 @@ const logout = async () => {
     await client.auth.signOut();
     allTransactions = [];
     currentFilter = 'all';
+    editingTransactionId = null;
+    resetTransactionForm();
     showLogin();
   } catch (error) {
     alert('Erro ao fazer logout: ' + error.message);
@@ -120,7 +123,53 @@ const checkSession = async () => {
 };
 
 // Transaction Management
-const addTransaction = async (e) => {
+const resetTransactionForm = () => {
+  document.getElementById('transactionForm').reset();
+  const submitBtn = document.querySelector('#transactionForm button[type="submit"]');
+  submitBtn.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    Adicionar Transação
+  `;
+  submitBtn.className = 'btn btn-primary';
+  editingTransactionId = null;
+  document.querySelector('.section-header h2').textContent = 'Nova Transação'; // Restaura título
+};
+
+const editTransaction = async (id) => {
+  const transaction = allTransactions.find(t => t.id === id);
+  if (!transaction) return;
+
+  // Preenche o formulário
+  document.getElementById('title').value = transaction.title;
+  document.getElementById('amount').value = transaction.amount;
+  document.getElementById('type').value = transaction.type;
+
+  // Configura botão para edição
+  const submitBtn = document.querySelector('#transactionForm button[type="submit"]');
+  submitBtn.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </svg>
+    Atualizar Transação
+  `;
+  submitBtn.classList.add('text-warning'); // Destaque visual
+  editingTransactionId = id;
+
+  // Atualiza título da seção
+  document.querySelector('.section-header h2').textContent = 'Editar Transação';
+
+  // Scroll suave para o form
+  document.querySelector('#transactionForm').scrollIntoView({ 
+    behavior: 'smooth', 
+    block: 'center' 
+  });
+};
+
+const addOrUpdateTransaction = async (e) => {
   e.preventDefault();
   
   const title = document.getElementById('title').value.trim();
@@ -142,37 +191,59 @@ const addTransaction = async (e) => {
   try {
     const { data: { user } } = await client.auth.getUser();
     
-    const { error } = await client
-      .from('transactions')
-      .insert({
-        user_id: user.id,
-        title,
-        amount,
-        type
-      });
+    if (editingTransactionId) {
+      // UPDATE
+      const { error } = await client
+        .from('transactions')
+        .update({
+          title,
+          amount,
+          type,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingTransactionId)
+        .eq('user_id', user.id); // Segurança extra
+      
+      if (error) throw error;
+      
+      alert('Transação atualizada com sucesso!');
+    } else {
+      // INSERT (novo)
+      const { error } = await client
+        .from('transactions')
+        .insert({
+          user_id: user.id,
+          title,
+          amount,
+          type
+        });
+      
+      if (error) throw error;
+    }
     
-    if (error) throw error;
-    
-    document.getElementById('transactionForm').reset();
+    resetTransactionForm();
     await loadTransactions();
     
   } catch (error) {
-    alert('Erro ao adicionar transação: ' + error.message);
+    alert(`Erro: ${error.message}`);
   } finally {
     showLoading(false);
   }
 };
 
 const deleteTransaction = async (id) => {
-  console.log("ID recebido:", id);
+  if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
   
   showLoading(true);
   
   try {
+    const { data: { user } } = await client.auth.getUser();
+    
     const { error } = await client
       .from('transactions')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id); // Segurança extra
     
     if (error) throw error;
     
@@ -187,9 +258,12 @@ const deleteTransaction = async (id) => {
 
 const loadTransactions = async () => {
   try {
+    const { data: { user } } = await client.auth.getUser();
+    
     const { data, error } = await client
       .from('transactions')
       .select('*')
+      .eq('user_id', user.id) // Filtra por usuário logado
       .order('created_at', { ascending: false });
     
     if (error) throw error;
@@ -246,10 +320,14 @@ const renderTransactions = () => {
         </div>
         <div class="transaction-amount">${sign} ${formatCurrency(transaction.amount)}</div>
         <div class="transaction-actions">
-<button class="btn-icon btn-delete"
-        onclick="deleteTransaction('${transaction.id}')"
-        title="Excluir">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="btn-icon btn-edit" onclick="editTransaction(${transaction.id})" title="Editar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+          <button class="btn-icon btn-delete" onclick="deleteTransaction(${transaction.id})" title="Excluir">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"></polyline>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
@@ -294,7 +372,8 @@ const escapeHtml = (text) => {
 
 // Event Listeners
 document.getElementById('loginForm').addEventListener('submit', login);
-document.getElementById('transactionForm').addEventListener('submit', addTransaction);
+document.getElementById('transactionForm').addEventListener('submit', addOrUpdateTransaction);
+document.getElementById('filterType').addEventListener('change', filterTransactions);
 
 // Permitir submit com Enter
 document.getElementById('email').addEventListener('keypress', (e) => {
