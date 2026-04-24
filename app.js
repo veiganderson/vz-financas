@@ -164,7 +164,7 @@ const addTransaction = async (e) => {
 };
 
 const deleteTransaction = async (id) => {
-  console.log("ID recebido:", id);
+  if (!confirm('Deseja realmente excluir esta transação?')) return;
   
   showLoading(true);
   
