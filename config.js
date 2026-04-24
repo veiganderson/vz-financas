@@ -1,8 +1,8 @@
 // Configuração do Supabase
 // IMPORTANTE: Substitua os valores abaixo pelas suas credenciais reais do Supabase
 
-const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
-const SUPABASE_KEY = 'SUA_CHAVE_PUBLICA_ANON_KEY';
+const SUPABASE_URL = 'https://wmfegtjgfvlnvyepgivd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtZmVndGpnZnZsbnZ5ZXBnaXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMjg4OTYsImV4cCI6MjA5MjYwNDg5Nn0.ZwEbMCaDcblBrz1-TfINCzJonjmjVh--EXKCk24uQzs';
 
 // Para obter suas credenciais:
 // 1. Acesse https://supabase.com
