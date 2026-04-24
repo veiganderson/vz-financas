@@ -1,81 +1,120 @@
-body {
-  font-family: Arial;
-  margin: 0;
-  background: #f4f6f8;
-}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vz Finanças</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
 
-.hidden { display: none; }
+<body>
 
-/* LOGIN */
-.login-box {
-  width: 320px;
-  margin: 120px auto;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-}
+<!-- LOGIN -->
+<div id="loginScreen" class="screen">
+  <div class="login-box">
 
-/* TOPBAR */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px;
-  background: white;
-  border-bottom: 1px solid #ddd;
-}
+    <h1>Vz Finanças</h1>
 
-/* CONTAINER */
-.container {
-  max-width: 1000px;
-  margin: auto;
-  padding: 16px;
-}
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Senha" required>
+      <button type="submit">Entrar</button>
+    </form>
 
-/* CARDS */
-.grid-3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 12px;
-}
+    <div id="loginError"></div>
 
-.card {
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
-}
+  </div>
+</div>
 
-/* SECTIONS */
-.section {
-  background: white;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
+<!-- APP -->
+<div id="appScreen" class="screen hidden">
 
-/* FORM */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
+  <header class="topbar">
+    <div>Vz Finanças</div>
+    <div>
+      <span id="userEmail"></span>
+      <button id="logoutBtn">Sair</button>
+    </div>
+  </header>
 
-input, select, button {
-  padding: 8px;
-}
+  <main class="container">
 
-/* TRANSAÇÕES */
-.transaction {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px;
-  border-bottom: 1px solid #eee;
-}
+    <!-- RESUMO -->
+    <section class="grid-3">
+      <div class="card">
+        <small>Receitas</small>
+        <strong id="totalIncome">0</strong>
+      </div>
 
-/* RESPONSIVO */
-@media (max-width: 768px) {
-  .grid-3,
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-}
+      <div class="card">
+        <small>Despesas</small>
+        <strong id="totalExpense">0</strong>
+      </div>
+
+      <div class="card">
+        <small>Saldo</small>
+        <strong id="balance">0</strong>
+      </div>
+    </section>
+
+    <!-- FORM -->
+    <section class="section">
+      <h2>Nova Transação</h2>
+
+      <form id="transactionForm" class="form-grid">
+
+        <input type="text" id="title" placeholder="Descrição" required>
+
+        <input type="number" id="amount" placeholder="Valor" step="0.01" required>
+
+        <select id="type">
+          <option value="income">Receita</option>
+          <option value="expense">Despesa</option>
+        </select>
+
+        <select id="category">
+          <option value="">Categoria</option>
+          <option value="Alimentação">Alimentação</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Moradia">Moradia</option>
+        </select>
+
+        <input type="number" id="installments" value="1" min="1">
+
+        <label class="checkbox">
+          <input type="checkbox" id="isRecurring">
+          Recorrente
+        </label>
+
+        <button type="submit">Adicionar</button>
+
+      </form>
+    </section>
+
+    <!-- LISTA -->
+    <section class="section">
+
+      <div class="section-header">
+        <h2>Transações</h2>
+
+        <select id="filterType">
+          <option value="all">Todas</option>
+          <option value="income">Receitas</option>
+          <option value="expense">Despesas</option>
+        </select>
+
+      </div>
+
+      <div id="transactionsList"></div>
+
+    </section>
+
+  </main>
+</div>
+
+<script src="config.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
