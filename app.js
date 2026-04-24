@@ -1,14 +1,18 @@
-// Inicialização do Supabase
+// ======================
+// SUPABASE
+// ======================
 const { createClient } = supabase;
 const client = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Estado global
+// ======================
+// ESTADO GLOBAL
+// ======================
 let allTransactions = [];
 let currentFilter = 'all';
 let currentDate = new Date();
 
 // ======================
-// Utility Functions
+// UTIL
 // ======================
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('pt-BR', {
@@ -26,21 +30,25 @@ const formatDate = (dateString) => {
   }).format(date);
 };
 
+const escapeHtml = (text) => {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+};
+
 const showLoading = (show = true) => {
   document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
 };
 
-const showError = (message) => {
-  const errorDiv = document.getElementById('loginError');
-  errorDiv.textContent = message;
-  errorDiv.style.display = 'block';
-  setTimeout(() => {
-    errorDiv.style.display = 'none';
-  }, 5000);
+const showError = (msg) => {
+  const el = document.getElementById('loginError');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
 };
 
 // ======================
-// Navegação
+// NAVEGAÇÃO
 // ======================
 const showApp = () => {
   document.getElementById('loginScreen').style.display = 'none';
@@ -50,11 +58,10 @@ const showApp = () => {
 const showLogin = () => {
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('appScreen').style.display = 'none';
-  document.getElementById('loginForm').reset();
 };
 
 // ======================
-// Auth
+// AUTH
 // ======================
 const login = async (e) => {
   e.preventDefault();
@@ -62,33 +69,24 @@ const login = async (e) => {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
 
-  if (!email || !password) {
-    showError('Preencha todos os campos');
-    return;
-  }
+  if (!email || !password) return showError('Preencha tudo');
 
   try {
-    const { data, error } = await client.auth.signInWithPassword({
-      email,
-      password
-    });
-
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
     if (error) throw error;
 
     document.getElementById('userEmail').textContent = data.user.email;
     showApp();
     await loadTransactions();
 
-  } catch (error) {
-    showError(error.message);
+  } catch (err) {
+    showError(err.message);
   }
 };
 
 const logout = async () => {
   if (!confirm('Deseja sair?')) return;
-
   await client.auth.signOut();
-  allTransactions = [];
   showLogin();
 };
 
@@ -106,12 +104,12 @@ const checkSession = async () => {
 // FILTROS
 // ======================
 const getFilteredByDate = () => {
-  const month = currentDate.getMonth();
-  const year = currentDate.getFullYear();
+  const m = currentDate.getMonth();
+  const y = currentDate.getFullYear();
 
   return allTransactions.filter(t => {
     const d = new Date(t.created_at);
-    return d.getMonth() === month && d.getFullYear() === year;
+    return d.getMonth() === m && d.getFullYear() === y;
   });
 };
 
@@ -123,6 +121,21 @@ const getVisibleTransactions = () => {
   }
 
   return data;
+};
+
+const changeMonth = (direction) => {
+  currentDate.setMonth(currentDate.getMonth() + direction);
+
+  renderTransactions();
+  updateSummary();
+
+  const el = document.getElementById('currentMonth');
+  if (el) {
+    el.textContent = currentDate.toLocaleDateString('pt-BR', {
+      month: 'long',
+      year: 'numeric'
+    });
+  }
 };
 
 // ======================
@@ -139,7 +152,7 @@ const addTransaction = async (e) => {
   const isRecurring = document.getElementById('isRecurring')?.checked || false;
 
   if (!title || !amount) {
-    alert('Preencha os campos corretamente');
+    alert('Preencha corretamente');
     return;
   }
 
@@ -175,30 +188,26 @@ const addTransaction = async (e) => {
     document.getElementById('transactionForm').reset();
     await loadTransactions();
 
-  } catch (error) {
-    alert(error.message);
+  } catch (err) {
+    alert(err.message);
   } finally {
     showLoading(false);
   }
 };
 
 const deleteTransaction = async (id) => {
-  if (!confirm('Excluir transação?')) return;
+  if (!confirm('Excluir?')) return;
 
   showLoading(true);
 
   try {
-    const { error } = await client
-      .from('transactions')
-      .delete()
-      .eq('id', id);
-
+    const { error } = await client.from('transactions').delete().eq('id', id);
     if (error) throw error;
 
     await loadTransactions();
 
-  } catch (error) {
-    alert(error.message);
+  } catch (err) {
+    alert(err.message);
   } finally {
     showLoading(false);
   }
@@ -207,7 +216,7 @@ const deleteTransaction = async (id) => {
 const editTransaction = async (id) => {
   const t = allTransactions.find(t => t.id === id);
 
-  const newTitle = prompt('Editar descrição:', t.title);
+  const newTitle = prompt('Editar:', t.title);
   if (!newTitle) return;
 
   showLoading(true);
@@ -222,8 +231,8 @@ const editTransaction = async (id) => {
 
     await loadTransactions();
 
-  } catch (error) {
-    alert(error.message);
+  } catch (err) {
+    alert(err.message);
   } finally {
     showLoading(false);
   }
@@ -246,8 +255,8 @@ const loadTransactions = async () => {
     renderTransactions();
     updateSummary();
 
-  } catch (error) {
-    alert(error.message);
+  } catch (err) {
+    alert(err.message);
   }
 };
 
@@ -268,13 +277,13 @@ const renderTransactions = () => {
 
     return `
       <div class="transaction-item ${t.type}">
-        <div class="transaction-details">
-          <div><strong>${escapeHtml(t.title)}</strong></div>
-          <div class="text-muted">${formatDate(t.created_at)}</div>
+        <div>
+          <strong>${escapeHtml(t.title)}</strong><br>
+          <small>${formatDate(t.created_at)}</small><br>
 
-          ${t.category ? `<div class="text-muted">${t.category}</div>` : ''}
-          ${t.installment_total ? `<div class="text-muted">${t.installment_number}/${t.installment_total}</div>` : ''}
-          ${t.is_recurring ? `<div class="text-muted">🔁 Recorrente</div>` : ''}
+          ${t.category ? `<small>${t.category}</small><br>` : ''}
+          ${t.installment_total ? `<small>${t.installment_number}/${t.installment_total}</small><br>` : ''}
+          ${t.is_recurring ? `<small>🔁 Recorrente</small>` : ''}
         </div>
 
         <div>${sign} ${formatCurrency(t.amount)}</div>
@@ -303,16 +312,7 @@ const updateSummary = () => {
 };
 
 // ======================
-// UTIL
-// ======================
-const escapeHtml = (text) => {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-};
-
-// ======================
-// EVENTS
+// EVENTOS
 // ======================
 document.getElementById('loginForm').addEventListener('submit', login);
 document.getElementById('transactionForm').addEventListener('submit', addTransaction);
@@ -323,7 +323,17 @@ document.getElementById('filterType').addEventListener('change', (e) => {
   updateSummary();
 });
 
-window.addEventListener('DOMContentLoaded', checkSession);
+window.addEventListener('DOMContentLoaded', () => {
+  checkSession();
+
+  const el = document.getElementById('currentMonth');
+  if (el) {
+    el.textContent = currentDate.toLocaleDateString('pt-BR', {
+      month: 'long',
+      year: 'numeric'
+    });
+  }
+});
 
 client.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_OUT') showLogin();
