@@ -5,17 +5,34 @@
 </head>
 <body>
 
-<h1>Vz Finanças</h1>
+<!-- LOGIN -->
+<div id="loginScreen">
+  <h2>Login</h2>
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Senha"><br>
+  <button onclick="login()">Entrar</button>
+</div>
 
-<h2>Login</h2>
-<input id="email" placeholder="Email"><br>
-<input id="password" type="password" placeholder="Senha"><br>
-<button onclick="login()">Entrar</button>
+<!-- APP -->
+<div id="appScreen" style="display:none;">
+  <h1>Vz Finanças</h1>
 
-<h2>Nova Transação</h2>
-<input id="title" placeholder="Descrição"><br>
-<input id="amount" placeholder="Valor"><br>
-<button onclick="addTransaction()">Salvar</button>
+  <button onclick="logout()">Sair</button>
+
+  <h3>Nova Transação</h3>
+  <input id="title" placeholder="Descrição"><br>
+  <input id="amount" placeholder="Valor"><br>
+
+  <select id="type">
+    <option value="income">Receita</option>
+    <option value="expense">Despesa</option>
+  </select><br>
+
+  <button onclick="addTransaction()">Salvar</button>
+
+  <h3>Transações</h3>
+  <ul id="list"></ul>
+</div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
@@ -24,8 +41,18 @@ const { createClient } = supabase
 
 const client = createClient(
   'https://wmfegtjgfvlnvyepgivd.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtZmVndGpnZnZsbnZ5ZXBnaXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMjg4OTYsImV4cCI6MjA5MjYwNDg5Nn0.ZwEbMCaDcblBrz1-TfINCzJonjmjVh--EXKCk24uQzs'
+  'SUA_CHAVE_AQUI'
 )
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none'
+  document.getElementById('appScreen').style.display = 'block'
+}
+
+function showLogin() {
+  document.getElementById('loginScreen').style.display = 'block'
+  document.getElementById('appScreen').style.display = 'none'
+}
 
 async function login() {
   const { error } = await client.auth.signInWithPassword({
@@ -33,16 +60,21 @@ async function login() {
     password: document.getElementById('password').value
   })
 
-  alert(error ? error.message : "Logado com sucesso")
+  if (error) {
+    alert(error.message)
+  } else {
+    showApp()
+    loadTransactions()
+  }
+}
+
+async function logout() {
+  await client.auth.signOut()
+  showLogin()
 }
 
 async function addTransaction() {
   const { data: { user } } = await client.auth.getUser()
-
-  if (!user) {
-    alert("Faça login primeiro")
-    return
-  }
 
   const { error } = await client
     .from('transactions')
@@ -50,10 +82,30 @@ async function addTransaction() {
       user_id: user.id,
       title: document.getElementById('title').value,
       amount: Number(document.getElementById('amount').value),
-      type: 'expense'
+      type: document.getElementById('type').value
     })
 
-  alert(error ? error.message : "Salvo com sucesso")
+  if (error) {
+    alert(error.message)
+  } else {
+    loadTransactions()
+  }
+}
+
+async function loadTransactions() {
+  const { data, error } = await client
+    .from('transactions')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  const list = document.getElementById('list')
+  list.innerHTML = ''
+
+  data.forEach(item => {
+    const li = document.createElement('li')
+    li.innerText = `${item.title} - ${item.amount} (${item.type})`
+    list.appendChild(li)
+  })
 }
 </script>
 
