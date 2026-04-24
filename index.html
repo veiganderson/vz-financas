@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vz Finanças</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -12,15 +12,17 @@
 <!-- LOGIN -->
 <div id="loginScreen" class="screen">
   <div class="login-box">
+
     <h1>Vz Finanças</h1>
 
     <form id="loginForm">
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="password" placeholder="Senha" required />
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Senha" required>
       <button type="submit">Entrar</button>
     </form>
 
     <div id="loginError"></div>
+
   </div>
 </div>
 
@@ -29,7 +31,7 @@
 
   <header class="topbar">
     <div>Vz Finanças</div>
-    <div class="topbar-right">
+    <div>
       <span id="userEmail"></span>
       <button id="logoutBtn">Sair</button>
     </div>
@@ -40,17 +42,17 @@
     <!-- RESUMO -->
     <section class="grid-3">
       <div class="card">
-        <span>Receitas</span>
+        <small>Receitas</small>
         <strong id="totalIncome">0</strong>
       </div>
 
       <div class="card">
-        <span>Despesas</span>
+        <small>Despesas</small>
         <strong id="totalExpense">0</strong>
       </div>
 
       <div class="card">
-        <span>Saldo</span>
+        <small>Saldo</small>
         <strong id="balance">0</strong>
       </div>
     </section>
@@ -61,9 +63,9 @@
 
       <form id="transactionForm" class="form-grid">
 
-        <input type="text" id="title" placeholder="Descrição" required />
+        <input type="text" id="title" placeholder="Descrição" required>
 
-        <input type="number" id="amount" placeholder="Valor" step="0.01" required />
+        <input type="number" id="amount" placeholder="Valor" step="0.01" required>
 
         <select id="type">
           <option value="income">Receita</option>
@@ -77,10 +79,10 @@
           <option value="Moradia">Moradia</option>
         </select>
 
-        <input type="number" id="installments" value="1" min="1" />
+        <input type="number" id="installments" value="1" min="1">
 
         <label class="checkbox">
-          <input type="checkbox" id="isRecurring" />
+          <input type="checkbox" id="isRecurring">
           Recorrente
         </label>
 
@@ -95,17 +97,11 @@
       <div class="section-header">
         <h2>Transações</h2>
 
-        <div class="filters">
-          <button id="prevMonth">←</button>
-          <span id="currentMonth"></span>
-          <button id="nextMonth">→</button>
-
-          <select id="filterType">
-            <option value="all">Todas</option>
-            <option value="income">Receitas</option>
-            <option value="expense">Despesas</option>
-          </select>
-        </div>
+        <select id="filterType">
+          <option value="all">Todas</option>
+          <option value="income">Receitas</option>
+          <option value="expense">Despesas</option>
+        </select>
 
       </div>
 
