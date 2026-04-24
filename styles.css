@@ -1,25 +1,17 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   margin: 0;
-  background: #f5f6fa;
-  color: #111;
+  background: #f4f6f8;
 }
 
-/* LAYOUT */
 .hidden { display: none; }
-
-.container {
-  max-width: 1000px;
-  margin: auto;
-  padding: 16px;
-}
 
 /* LOGIN */
 .login-box {
   width: 320px;
-  margin: 100px auto;
-  background: white;
+  margin: 120px auto;
   padding: 20px;
+  background: white;
   border-radius: 10px;
 }
 
@@ -27,9 +19,16 @@ body {
 .topbar {
   display: flex;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 12px;
   background: white;
   border-bottom: 1px solid #ddd;
+}
+
+/* CONTAINER */
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 16px;
 }
 
 /* CARDS */
@@ -65,12 +64,7 @@ input, select, button {
   padding: 8px;
 }
 
-/* LISTA */
-#transactionsList {
-  display: flex;
-  flex-direction: column;
-}
-
+/* TRANSAÇÕES */
 .transaction {
   display: flex;
   justify-content: space-between;
