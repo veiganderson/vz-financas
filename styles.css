@@ -241,3 +241,20 @@ button:hover {
     gap: 6px;
   }
 }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.form-grid input,
+.form-grid select {
+  padding: 8px;
+  font-size: 14px;
+}
+
+.form-grid button {
+  grid-column: span 3;
+  padding: 10px;
+}
