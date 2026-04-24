@@ -1,28 +1,124 @@
-<!DOCTYPE html> <html lang="pt-BR"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Vz Finanças - Gestão Financeira Pessoal</title> <link rel="stylesheet" href="styles.css"> </head> <body> <!-- Tela de Login --> <div id="loginScreen" class="screen"> <div class="login-container"> <div class="login-header"> <div class="logo"> <svg width="40" height="40" viewBox="0 0 40 40" fill="none"> <rect width="40" height="40" rx="8" fill="#4F46E5"/> <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/> </svg> </div> <h1>Vz Finanças</h1> <p>Gestão financeira pessoal simplificada</p> </div> <form id="loginForm" class="login-form"> <div class="form-group"> <label for="email">E-mail</label> <input type="email" id="email" placeholder="seu@email.com" required autocomplete="email" > </div> <div class="form-group"> <label for="password">Senha</label> <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" > </div> <button type="submit" class="btn btn-primary btn-block"> <span class="btn-text">Entrar</span> <span class="btn-loader" style="display:none;"> <svg class="spinner" width="20" height="20" viewBox="0 0 50 50"> <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5"></circle> </svg> </span> </button> </form> <div id="loginError" class="error-message" style="display:none;"></div> </div> </div> <!-- Tela Principal do App --> <div id="appScreen" class="screen" style="display:none;"> <nav class="navbar"> <div class="nav-container"> <div class="nav-brand"> <svg width="32" height="32" viewBox="0 0 40 40" fill="none"> <rect width="40" height="40" rx="8" fill="#4F46E5"/> <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/> </svg> <span>Vz Finanças</span> </div> <div class="nav-actions"> <span id="userEmail" class="user-email"></span> <button onclick="logout()" class="btn btn-secondary">Sair</button> </div> </div> </nav> <div class="container"> <!-- Cards de Resumo --> <div class="summary-cards"> <div class="card card-income"> <div class="card-icon"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"> <path d="M12 5v14M5 12l7-7 7 7"/> </svg> </div> <div class="card-content"> <p class="card-label">Receitas</p> <h3 class="card-value" id="totalIncome">R$ 0,00</h3> </div> </div> <div class="card card-expense"> <div class="card-icon"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"> <path d="M12 19V5M5 12l7 7 7-7"/> </svg> </div> <div class="card-content"> <p class="card-label">Despesas</p> <h3 class="card-value" id="totalExpense">R$ 0,00</h3> </div> </div> <div class="card card-balance"> <div class="card-icon"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"> <rect x="2" y="5" width="20" height="14" rx="2"/> <line x1="2" y1="10" x2="22" y2="10"/> </svg> </div> <div class="card-content"> <p class="card-label">Saldo</p> <h3 class="card-value" id="balance">R$ 0,00</h3> </div> </div> </div> <!-- Formulário de Nova Transação --> <div class="section"> <div class="section-header"> <h2>Nova Transação</h2> </div> <form id="transactionForm" class="form-grid">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vz Finanças</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
 
-  <input type="text" id="title" placeholder="Descrição" required>
+<body>
 
-  <input type="number" id="amount" placeholder="Valor" step="0.01" required>
+<!-- LOGIN -->
+<div id="loginScreen" class="screen">
+  <div class="login-box">
+    <h1>Vz Finanças</h1>
 
-  <select id="type">
-    <option value="income">Receita</option>
-    <option value="expense">Despesa</option>
-  </select>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Senha" required />
+      <button type="submit">Entrar</button>
+    </form>
 
-  <select id="category">
-    <option value="">Categoria</option>
-    <option value="Alimentação">Alimentação</option>
-    <option value="Transporte">Transporte</option>
-    <option value="Moradia">Moradia</option>
-  </select>
+    <div id="loginError"></div>
+  </div>
+</div>
 
-  <input type="number" id="installments" value="1" min="1">
+<!-- APP -->
+<div id="appScreen" class="screen hidden">
 
-  <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
-    <input type="checkbox" id="isRecurring">
-    Recorrente
-  </label>
+  <header class="topbar">
+    <div>Vz Finanças</div>
+    <div class="topbar-right">
+      <span id="userEmail"></span>
+      <button id="logoutBtn">Sair</button>
+    </div>
+  </header>
 
-  <button type="submit">Adicionar</button>
+  <main class="container">
 
-</form> </div> <!-- Lista de Transações --> <div class="section"> <div class="section-header"> <h2>Histórico de Transações</h2> <div class="filter-group"> <select id="filterType" onchange="filterTransactions()"> <option value="all">Todas</option> <option value="income">Receitas</option> <option value="expense">Despesas</option> </select> </div> </div> <div id="transactionsList" class="transactions-list"> <div class="empty-state"> <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"> <rect x="2" y="5" width="20" height="14" rx="2"/> <line x1="2" y1="10" x2="22" y2="10"/> </svg> <p>Nenhuma transação registrada ainda</p> <span>Adicione sua primeira transação acima</span> </div> </div> </div> </div> </div> <!-- Loading Overlay --> <div id="loadingOverlay" class="loading-overlay" style="display:none;"> <div class="loading-spinner"> <svg class="spinner" width="50" height="50" viewBox="0 0 50 50"> <circle cx="25" cy="25" r="20" fill="none" stroke="#4F46E5" stroke-width="5"></circle> </svg> </div> </div> <!-- Scripts --> <script src="config.js"></script> <script src="https://unpkg.com/@supabase/supabase-js@2"></script> <script src="app.js"></script> </body> </html>
+    <!-- RESUMO -->
+    <section class="grid-3">
+      <div class="card">
+        <span>Receitas</span>
+        <strong id="totalIncome">0</strong>
+      </div>
+
+      <div class="card">
+        <span>Despesas</span>
+        <strong id="totalExpense">0</strong>
+      </div>
+
+      <div class="card">
+        <span>Saldo</span>
+        <strong id="balance">0</strong>
+      </div>
+    </section>
+
+    <!-- FORM -->
+    <section class="section">
+      <h2>Nova Transação</h2>
+
+      <form id="transactionForm" class="form-grid">
+
+        <input type="text" id="title" placeholder="Descrição" required />
+
+        <input type="number" id="amount" placeholder="Valor" step="0.01" required />
+
+        <select id="type">
+          <option value="income">Receita</option>
+          <option value="expense">Despesa</option>
+        </select>
+
+        <select id="category">
+          <option value="">Categoria</option>
+          <option value="Alimentação">Alimentação</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Moradia">Moradia</option>
+        </select>
+
+        <input type="number" id="installments" value="1" min="1" />
+
+        <label class="checkbox">
+          <input type="checkbox" id="isRecurring" />
+          Recorrente
+        </label>
+
+        <button type="submit">Adicionar</button>
+
+      </form>
+    </section>
+
+    <!-- LISTA -->
+    <section class="section">
+
+      <div class="section-header">
+        <h2>Transações</h2>
+
+        <div class="filters">
+          <button id="prevMonth">←</button>
+          <span id="currentMonth"></span>
+          <button id="nextMonth">→</button>
+
+          <select id="filterType">
+            <option value="all">Todas</option>
+            <option value="income">Receitas</option>
+            <option value="expense">Despesas</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div id="transactionsList"></div>
+
+    </section>
+
+  </main>
+</div>
+
+<script src="config.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
