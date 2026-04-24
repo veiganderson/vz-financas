@@ -10,12 +10,45 @@
 <h2>Login</h2>
 <input id="email" placeholder="Email"><br>
 <input id="password" type="password" placeholder="Senha"><br>
-<button>Entrar</button>
+<button onclick="login()">Entrar</button>
 
 <h2>Nova Transação</h2>
-<input placeholder="Descrição"><br>
-<input placeholder="Valor"><br>
-<button>Salvar</button>
+<input id="title" placeholder="Descrição"><br>
+<input id="amount" placeholder="Valor"><br>
+<button onclick="addTransaction()">Salvar</button>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const supabase = createClient(
+  'SUA_URL',
+  'SUA_ANON_KEY'
+)
+
+window.login = async () => {
+  const { error } = await supabase.auth.signInWithPassword({
+    email: document.getElementById('email').value,
+    password: document.getElementById('password').value
+  })
+
+  alert(error ? error.message : "Logado com sucesso")
+}
+
+window.addTransaction = async () => {
+  const user = (await supabase.auth.getUser()).data.user
+
+  const { error } = await supabase
+    .from('transactions')
+    .insert({
+      user_id: user.id,
+      title: document.getElementById('title').value,
+      amount: Number(document.getElementById('amount').value),
+      type: 'expense'
+    })
+
+  alert(error ? error.message : "Salvo com sucesso")
+}
+</script>
 
 </body>
 </html>
